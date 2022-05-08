@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DesignSurface">
+    <option name="filePathToZoomLevelMap">
+      <map>
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/drawable/black_background_selector.xml" value="0.2203125" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/drawable/close_background_gradient.xml" value="0.2203125" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/drawable/ic_baseline_stop_circle_24.xml" value="0.1125" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/drawable/ic_baseline_stop_circle_24_red.xml" value="0.1125" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/layout-v21/fragment_notification_view_large.xml" value="0.1671195652173913" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/layout/activity_main.xml" value="0.1" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/layout/activity_test.xml" value="0.14356884057971014" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/layout/content_test.xml" value="0.14356884057971014" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/layout/fragment_floating_alert_dialog.xml" value="0.25" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/layout/fragment_floating_button_close.xml" value="0.19655797101449277" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/layout/fragment_floating_power_button.xml" value="0.19655797101449277" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/layout/fragment_notification_view_large.xml" value="0.21" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/layout/fragment_notification_view_small.xml" value="0.14447463768115942" />
+      </map>
+    </option>
+  </component>
+  <component name="ProjectRootManager" version="2" languageLevel="JDK_11" default="true" project-jdk-name="1.8" project-jdk-type="JavaSDK">
+    <output url="file://$PROJECT_DIR$/build/classes" />
+  </component>
+  <component name="ProjectType">
+    <option name="id" value="Android" />
+  </component>
+</project>

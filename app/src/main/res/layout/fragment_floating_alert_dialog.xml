@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@color/black_A30">
+
+    <RelativeLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_margin="15dp"
+        android:background="@color/black_51_50_50"
+        android:layout_centerInParent="true">
+
+        <ImageView
+            android:id="@+id/dialogClose"
+            android:layout_width="25dp"
+            android:layout_height="25dp"
+            android:src="@drawable/ic_baseline_close_24_red"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="10dp"/>
+
+        <TextView
+            android:id="@+id/dialogTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:padding="10dp"
+            android:textColor="@color/white"
+            android:textSize="18sp"
+            tools:text="Dialog Title"
+            android:visibility="gone"/>
+
+        <ScrollView
+            android:id="@+id/dialogMessageContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/dialogClose"
+            android:layout_marginBottom="15dp">
+
+            <TextView
+                android:id="@+id/dialogMessage"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginHorizontal="20dp"
+                android:gravity="start"
+                android:textColor="@color/white"
+                android:textSize="16sp"
+                android:textStyle="bold"
+                tools:text="@string/accessibility_guide" />
+        </ScrollView>
+        <LinearLayout
+            android:id="@+id/dialogButtonsContainer"
+            android:layout_width="match_parent"
+            android:layout_height="50dp"
+            android:layout_marginTop="15dp"
+            android:orientation="horizontal"
+            android:layout_below="@id/dialogMessageContainer"
+            android:gravity="end">
+
+            <Button
+                android:id="@+id/negativeBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:textColor="@color/teal_0_150_136"
+                android:textStyle="bold"
+                android:backgroundTint="@color/black_background_selector"
+                android:padding="15dp"
+                android:textAllCaps="true"
+                android:visibility="gone"
+                tools:text="Cancel" />
+
+            <Button
+                android:id="@+id/positiveBtn"
+                android:layout_width="wrap_content"
+                android:layout_height="50dp"
+                android:textColor="@color/teal_0_150_136"
+                android:textStyle="bold"
+                android:backgroundTint="@color/black_background_selector"
+                android:padding="15dp"
+                android:textAllCaps="true"
+                tools:text="Enable" />
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</RelativeLayout>

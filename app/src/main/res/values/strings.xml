@@ -1,0 +1,59 @@
+<resources>
+    <string name="app_name">SoftPowerButton</string>
+    <string name="floating_button_window_launch_error">Failed to launch floating button.</string>
+    <string name="floating_button_window_close_error">Failed to close floating button window</string>
+    <string name="spb_notification_title">SoftPowerButton</string>
+    <string name="spb_notification_desc">SoftPowerButton running…</string>
+    <string name="spb_notification_channel_name">SoftPowerButton Channel</string>
+    <string name="spb_notification_channel_description">Notification channel for SoftPowerButton</string>
+    <string name="dismiss">Dismiss</string>
+    <string name="stop_all">Stop all</string>
+    <string name="ok">OK</string>
+    <string name="overlay_permission_request">Allow SoftPowerButton to draw over your apps to be enable display a floating easy
+        access button.</string>
+    <string name="spb_device_admin">SoftPowerButton device admin</string>
+    <string name="spb_device_admin_description">SoftPowerButton device admin implementation to enable an instant screen lock feature.</string>
+    <string name="add_admin_extra_app_explanation">This permission needs to be granted to enable SoftPowerButton initiate
+        lock screen when you ask it to. Please ignore the danger warning afterwards. This app is safe and open source.</string>
+    <string name="device_admin_permission_rejected_warning">Device admin permission rejected. SoftPowerButton will not be able to lock screen on command.
+        SoftPowerButton will not be able to lock screen on command. Close the floating button to request again.</string>
+    <string name="accessibility_service_description">SoftPowerButton accessibility service to enable it perform an accessibility action</string>
+    <string name="reboot_confirm">Are you sure you want to restart phone?</string>
+    <string name="yes">Yes</string>
+    <string name="title_activity_test">TestActivity</string>
+    <string name="accessibility_service_not_enabled">Power menu couldn\'t be shown because the app\'s accessibility service is not enabled.</string>
+    <string name="enable_text">Enable</string>
+    <string name="overlay_permission_rejected">Overlay permission rejected. SoftPowerButton will not be able to show on the screen.</string>
+    <string name="accessibility_service_instr">To show the power menu for restart, etc, enable accessibility service for this app.</string>
+    <string name="accessibility_not_enabled_warning">Accessibility service for SoftPowerButton needs to be enabled to be able to show power menu, lock screen and listen to volume keys</string>
+    <string name="cancel">Cancel</string>
+    <string name="accessibility_guide">If you are on the accessibility settings page, go to \'More downloaded services\' or \'Downloaded apps\' and locate SoftPowerButton. Click on it and enable it\'s accessibility service.</string>
+    <string name="floating_dialog_close_error">Failed to close floating dialog window.</string>
+    <string name="floating_dialog_window_launch_error">Failed to launch floating dialog.</string>
+    <string name="sleep_screen">Sleep</string>
+    <string name="power_menu">Power menu</string>
+    <string name="close">Close</string>
+    <string name="enable_accessibility_service_screen_lock">Enable accessibility service for SoftPowerButton in order to lock screen.</string>
+    <string name="enable_accessibility_service_power_menu">Enable accessibility service for SoftPowerButton to show power menu for restart.</string>
+    <string name="stop_service_shortcut_label">Stop service.</string>
+    <string name="stop_service_shortcut_label1">Stop accessibility service to enable you uninstall the app.</string>
+    <string name="general_guide">Welcome to the SoftPowerButton guide.\n\n\nSoftPowerButton offers all the functionalities
+        of your real power button whether it\'s broken or not.\nThis means you can do all the things you used to do with your real power button using this app.\n\n
+        The functionalities includes:\n\n
+        1. Sleep\/Lock your phone screen by clicking the floating button once.\n\n
+        2. Show the power menu to access the reboot button and others by long pressing on the floating button.\n\n
+        3. Wake up the phone by clicking on your volume buttons.\n\n
+        4. Easily access these features anywhere with the floating widget and tray notification.\n\n
+        5. Easily access these features from your locked screen using the lock screen notification.\n\n
+        6. Take screenshots by clicking on the floating button twice.\n\n
+        Note: If your phone powered off and your real power button is broken, you can start the app by pressing both volume buttons
+        while you insert a USB cable into it\'s port at the same time. The phone\'s recovery menu will be shown to you.
+        Use the volume button to navigate to \'Reboot\' and wait or just wait for the phone to put it in reboot mode.
+        After a while your phone will automatically reboot itself.\n\n\n
+        Other Instructions\n\n\n
+        1. To close or hide the floating power button, drag the button unto the white close icon.\n\n
+        2. To uninstall the app, click on \'Stop all\' in the notification or long press app icon to reveal
+        a shortcut to click on. After this, try to uninstall.\n\n
+    </string>
+    <string name="uninstall_ready">App is now ready to uninstall.</string>
+</resources>

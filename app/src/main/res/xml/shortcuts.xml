@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:shortcutId="stop_service"
+        android:enabled="true"
+        android:icon="@drawable/ic_baseline_stop_circle_24_red"
+        android:shortcutShortLabel="@string/stop_service_shortcut_label"
+        android:shortcutLongLabel="@string/stop_service_shortcut_label1">
+
+        <intent
+            android:action="dev.eseudom.softpowerbutton.intent.action.STOP_ACCESSIBILITY_SERVICE"
+            android:targetPackage="dev.eseudom.softpowerbutton"
+            android:targetClass="dev.eseudom.softpowerbutton.StopAccessibilityActivity" />
+
+    </shortcut>
+
+</shortcuts>
