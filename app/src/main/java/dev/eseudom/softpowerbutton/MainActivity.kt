@@ -19,6 +19,7 @@ import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import dev.eseudom.softpowerbutton.dialog.EnableServiceDialogFragment
 import dev.eseudom.softpowerbutton.dialog.OverlayPermissionDialogFragment
+import dev.eseudom.softpowerbutton.dialog.XiaomiPermissionDialogFragment
 import dev.eseudom.softpowerbutton.service.FloatingWindowService
 import dev.eseudom.softpowerbutton.util.C
 import dev.eseudom.softpowerbutton.util.C.ACCESSIBILITY_SETTINGS_GUIDE
@@ -32,6 +33,7 @@ class MainActivity : AppCompatActivity() {
 
     private val mOverlayConfirmDialogFragment = OverlayPermissionDialogFragment()
     private val mEnableServiceDialogFragment = EnableServiceDialogFragment()
+    private val mXiaomiDialogFragment = XiaomiPermissionDialogFragment()
     private var mServiceConnection: ServiceConnection? = null
     private var mFloatingWindowService: FloatingWindowService? = null
 
@@ -60,6 +62,11 @@ class MainActivity : AppCompatActivity() {
             //onBackPressed()
         } //else //todo show interactive dialogs instead
             //Toast.makeText(this, getString(R.string.accessibility_not_enabled_warning), Toast.LENGTH_LONG).show()
+    }
+
+    private var xiaomiSettingsResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+        }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -112,17 +119,31 @@ class MainActivity : AppCompatActivity() {
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { //greater then android M devices
                 if (Settings.canDrawOverlays(this) && isActiveAdmin() && U.isAccessibilityServiceRunning(this)) {
-                    onBackPressed(); checkToShowGeneralGuide()
+                    finalActions()
                 }
             } else { //less than android M devices
                 if (isActiveAdmin() && U.isAccessibilityServiceRunning(this)) {
-                    onBackPressed(); checkToShowGeneralGuide()
+                    finalActions()
                 }
             }
         } else { //greater then android P devices
             if (Settings.canDrawOverlays(this) && U.isAccessibilityServiceRunning(this)) {
-                onBackPressed(); checkToShowGeneralGuide()
+                finalActions()
             }
+        }
+    }
+
+    private fun finalActions() {
+        if (U.isXiaomiAPI28Above()) {
+            if (!U.getXiaomiPermissionRequestStatus(this))
+                showXiaomiPermissionDialog()
+            else {
+                onBackPressed()
+                checkToShowGeneralGuide()
+            }
+        } else {
+            onBackPressed()
+            checkToShowGeneralGuide()
         }
     }
 
@@ -219,6 +240,23 @@ class MainActivity : AppCompatActivity() {
             }
             mOverlayConfirmDialogFragment.show(supportFragmentManager, "AlertDialog")
             mOverlayConfirmDialogFragment.setShown(true)
+        }
+    }
+
+    private fun showXiaomiPermissionDialog() {
+        if (!mXiaomiDialogFragment.isShown() || !mXiaomiDialogFragment.isAdded
+            || !mXiaomiDialogFragment.isVisible) {
+
+            mXiaomiDialogFragment.setListenerPos { _, _ ->
+                U.launchXiaomiPermissions(this)
+            }
+            mXiaomiDialogFragment.setListenerNeg { _, _ ->
+                onBackPressed()
+            }
+            mXiaomiDialogFragment.show(supportFragmentManager, "AlertDialog")
+            mXiaomiDialogFragment.setShown(true)
+
+            U.saveXiaomiPermissionRequestStatus(true, this)
         }
     }
 

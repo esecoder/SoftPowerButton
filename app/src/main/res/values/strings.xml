@@ -54,6 +54,11 @@
         1. To close or hide the floating power button, drag the button unto the white close icon.\n\n
         2. To uninstall the app, click on \'Stop all\' in the notification or long press app icon to reveal
         a shortcut to click on. After this, try to uninstall.\n\n
+        3. If your device is a Xiaomi device please enable the \'Show notification in lock screen\' to be able to perform power
+        button functions when your screen is locked.\n\n
     </string>
     <string name="uninstall_ready">App is now ready to uninstall.</string>
+    <string name="xiaomi_permission_request">Enable \'show in lock screen\' to be able to still perform power button functions when you device screen is locked. Grant other permissions to fully maximize the experience.</string>
+    <string name="preference_file_key">dev.eseudom.softpowerbutton.PREFERENCE_FILE</string>
+    <string name="xiaomi_permission_request_status">xiaomi_permission_request_status</string>
 </resources>

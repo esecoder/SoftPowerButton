@@ -14,6 +14,7 @@ import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
 import androidx.localbroadcastmanager.content.LocalBroadcastManager
+import dev.eseudom.softpowerbutton.R
 import dev.eseudom.softpowerbutton.service.FloatingWindowService
 import dev.eseudom.softpowerbutton.service.SPBAccessibilityService
 import dev.eseudom.softpowerbutton.util.C.ACTION_ACCESSIBILITY_GLOBAL_ACTIONS_DIALOG
@@ -22,6 +23,10 @@ import dev.eseudom.softpowerbutton.util.C.ACTION_ACCESSIBILITY_SCREENSHOT
 import dev.eseudom.softpowerbutton.util.C.ACTION_CLOSE_FLOATING_WIDGET
 import dev.eseudom.softpowerbutton.util.C.ACTION_RESTART_ACCESSIBILITY
 import dev.eseudom.softpowerbutton.util.C.INTENT_EXTRA_ACTION
+import java.io.BufferedReader
+import java.io.IOException
+import java.io.InputStreamReader
+import java.util.*
 
 class U {
 
@@ -148,6 +153,58 @@ class U {
                 if (enabled) PackageManager.COMPONENT_ENABLED_STATE_ENABLED else PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
                 PackageManager.DONT_KILL_APP
             )
+        }
+
+        fun isXiaomi(): Boolean {
+            return "xiaomi" == Build.MANUFACTURER.lowercase(Locale.ROOT) ||
+                    getSystemProperty("ro.miui.ui.version.name")?.isNotBlank() == true
+        }
+
+        fun isXiaomiAPI28Above(): Boolean {
+            return isXiaomi() && Build.VERSION.SDK_INT >= 28
+        }
+
+        fun launchXiaomiPermissions(context: Context) {
+            val intent = Intent("miui.intent.action.APP_PERM_EDITOR")
+            intent.setClassName("com.miui.securitycenter", "com.miui.permcenter.permissions.PermissionsEditorActivity")
+            intent.putExtra("extra_pkgname", context.packageName)
+
+            context.startActivity(intent)
+        }
+
+        private fun getSystemProperty(propName: String): String? {
+            val line: String
+            var input: BufferedReader? = null
+            try {
+                val p = Runtime.getRuntime().exec("getprop $propName")
+                input = BufferedReader(InputStreamReader(p.inputStream), 1024)
+                line = input.readLine()
+                input.close()
+            } catch (ex: IOException) {
+                return null
+            } finally {
+                if (input != null) {
+                    try {
+                        input.close()
+                    } catch (e: IOException) {
+                        e.printStackTrace()
+                    }
+                }
+            }
+            return line
+        }
+
+        fun saveXiaomiPermissionRequestStatus(value: Boolean, context: Context) {
+            val sharedPref = context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE) ?: return
+            with (sharedPref.edit()) {
+                putBoolean(context.getString(R.string.xiaomi_permission_request_status), value)
+                apply()
+            }
+        }
+
+        fun getXiaomiPermissionRequestStatus(context: Context): Boolean {
+            return context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE)
+                .getBoolean(context.getString(R.string.xiaomi_permission_request_status), false)
         }
     }
 }
