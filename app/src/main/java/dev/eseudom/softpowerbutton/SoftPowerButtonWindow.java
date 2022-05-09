@@ -356,7 +356,7 @@ public class SoftPowerButtonWindow {
                                 + " screenLocX=" + screenLoc[0] + " screenLocY=" + screenLoc[1]);*/
 
                         longPressedTimeRunnable = () -> {
-                            if (downEvent && !inClosePos && !floatingButtonMoving) {
+                            if (downEvent && !inClosePos && !hasMoved(initialX, initialY, mButtonLayoutParams.x, mButtonLayoutParams.y)) {
                                 floatingCardView.performLongClick();
                                 isLongPressed = true;
                             }
