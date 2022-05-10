@@ -239,8 +239,6 @@ public class SoftPowerButtonWindow {
 
     public void show() {
         try {
-            //todo check if this is first launch, then show guide dialog-like page
-
             // check if the view is already
             // inflated or present in the window
             if (mFloatingButtonView.getWindowToken() == null) {
