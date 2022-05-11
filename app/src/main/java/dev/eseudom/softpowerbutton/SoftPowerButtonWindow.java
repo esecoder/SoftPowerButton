@@ -53,15 +53,19 @@ public class SoftPowerButtonWindow {
     private final AccessibilityManager mASM;
     private final ActivityManager mAM;
     private final CardView floatingCardView;
-    private final ImageView mCloseView, mDialogCloseView;
+    private final ImageView mCloseView, mPowerIcon;
     private final TextView mDialogMessageView, mDialogPosView, mDialogNegView;
     private Intent capturePermIntent;
 
     private int resultCode;
     private boolean floatingButtonMoving = false;
     boolean inClosePos = false;
+    float displayDensity;
 
     private final BroadcastReceiver mReceiver;
+
+    final Handler minimizeBtnTimeHandler = new Handler();
+    Runnable minimizeBtnTimeRunnable;
 
     public SoftPowerButtonWindow(Context context) {
         mContext = context;
@@ -140,6 +144,11 @@ public class SoftPowerButtonWindow {
         U.Companion.enableAccessibilityService(context, U.Companion.isAccessibilityServiceRunning(context));
 
         floatingCardView = mFloatingButtonView.findViewById(R.id.floatingCardView);
+        mPowerIcon = mFloatingButtonView.findViewById(R.id.power);
+
+        displayDensity = context.getResources()
+                .getDisplayMetrics()
+                .density;
 
         mCloseView = new ImageView(context);
         mCloseView.setImageResource(R.drawable.ic_action_close);
@@ -182,7 +191,7 @@ public class SoftPowerButtonWindow {
 
         floatingCardView.setOnTouchListener(getFloatingViewTouchListener(context));
 
-        mDialogCloseView = mFloatingDialogView.findViewById(R.id.dialogClose);
+        ImageView mDialogCloseView = mFloatingDialogView.findViewById(R.id.dialogClose);
         mDialogCloseView.setOnClickListener(view -> closeDialog());
         mDialogMessageView = mFloatingDialogView.findViewById(R.id.dialogMessage);
         mDialogPosView = mFloatingDialogView.findViewById(R.id.positiveBtn);
@@ -200,6 +209,58 @@ public class SoftPowerButtonWindow {
     private void hideFloatingButtonTimed(long delay) {
         floatingCardView.setVisibility(View.INVISIBLE);
         new Handler().postDelayed(() -> floatingCardView.setVisibility(View.VISIBLE), delay);
+    }
+
+    private void autoMinimizeButton(long delay, int mainWidth, int mainHeight,
+                                    View mainView, View icon) {
+        minimizeBtnTimeRunnable = () -> {
+            resizeView(mainWidth, mainHeight, mainView);
+            //20% reductions from original size of 30dp and margin of 10dp
+            resizeAndResetMarginView(dpToPx(24), dpToPx(24), dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8), icon);
+            mainView.setAlpha(0.5f); //make it faint a bit
+        };
+        new Handler().postDelayed(minimizeBtnTimeRunnable, delay);
+    }
+
+    private void restoreButton(int mainWidth, int mainHeight, View mainView, View icon) {
+        minimizeBtnTimeHandler.removeCallbacks(minimizeBtnTimeRunnable);
+        resizeView(mainWidth, mainHeight, mainView);
+        //restore original size of 30dp and margin of 10dp
+        resizeAndResetMarginView(dpToPx(30), dpToPx(30), dpToPx(10), dpToPx(10), dpToPx(10), dpToPx(10), icon);
+        mainView.setAlpha(1.0f);
+    }
+
+    private void resizeView(int width, int height, View view) {
+        ViewGroup.LayoutParams layoutParams = view.getLayoutParams();
+        layoutParams.width = width;
+        layoutParams.height = height;
+        view.setLayoutParams(layoutParams);
+    }
+
+    private void resizeAndResetMarginView(int width, int height, int topMargin, int rightMargin, int bottomMargin,
+                                          int leftMargin, View view) {
+        view.getLayoutParams().width = width;
+        view.getLayoutParams().height = height;
+        if (view.getLayoutParams() instanceof ViewGroup.MarginLayoutParams) {
+            ViewGroup.MarginLayoutParams p = (ViewGroup.MarginLayoutParams) view.getLayoutParams();
+            p.setMargins(leftMargin, topMargin, rightMargin, bottomMargin);
+            view.requestLayout();
+        }
+    }
+
+    private int dpToPx(int dp, Context context) {
+        float density = context.getResources()
+                .getDisplayMetrics()
+                .density;
+        return dpToPx(dp, density);
+    }
+
+    private int dpToPx(int dp) {
+        return dpToPx(dp, displayDensity);
+    }
+
+    private int dpToPx(int dp, float density) {
+        return Math.round((float) dp * density);
     }
 
     private void showEnableAccessibilityServiceDialog(Context context) {
@@ -252,6 +313,9 @@ public class SoftPowerButtonWindow {
                     mWindowManager.addView(mCloseView, mCloseLayoutParams);
                 }
             }
+
+            //minimize UI by 20%
+            autoMinimizeButton(20000, dpToPx(40), dpToPx(40), floatingCardView, mPowerIcon);
         } catch (Exception e) {
             e.printStackTrace();
             Log.d(TAG, e.getMessage());
@@ -362,6 +426,9 @@ public class SoftPowerButtonWindow {
                         longPressedTimeHandler.postDelayed(longPressedTimeRunnable, delay);
                         downEvent = true;
 
+                        //restore to original size of 50dp
+                        restoreButton(dpToPx(50), dpToPx(50), floatingCardView, mPowerIcon);
+
                         return true;
                     }
 
@@ -391,6 +458,10 @@ public class SoftPowerButtonWindow {
 
                         //TODO animate slide down
                         mCloseView.setVisibility(View.GONE);
+
+                        //minimize UI by 20%
+                        autoMinimizeButton(10000, dpToPx(40), dpToPx(40), floatingCardView,
+                                mPowerIcon);
 
                         return true;
                     }
