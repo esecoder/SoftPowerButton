@@ -45,7 +45,7 @@ public class SoftPowerButtonWindow {
 
     private final static String TAG = SoftPowerButtonWindow.class.getSimpleName();
     private final Context mContext;
-    private final View mFloatingButtonView, mFloatingDialogView;
+    private final View mFloatingButtonView, mFloatingDialogView, mCloseView;
     private final WindowManager.LayoutParams mButtonLayoutParams, mCloseLayoutParams, mDialogLayoutParams;
     private final WindowManager mWindowManager;
     private final DevicePolicyManager mDPM;
@@ -53,7 +53,7 @@ public class SoftPowerButtonWindow {
     private final AccessibilityManager mASM;
     private final ActivityManager mAM;
     private final CardView floatingCardView;
-    private final ImageView mCloseView, mPowerIcon;
+    private final ImageView mCloseIcon, mPowerIcon;
     private final TextView mDialogMessageView, mDialogPosView, mDialogNegView;
     private Intent capturePermIntent;
 
@@ -73,14 +73,14 @@ public class SoftPowerButtonWindow {
         LayoutInflater layoutInflater = LayoutInflater.from(context);//(LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mFloatingButtonView = layoutInflater.inflate(R.layout.fragment_floating_power_button, null);
         mFloatingDialogView = layoutInflater.inflate(R.layout.fragment_floating_alert_dialog, null);
+        mCloseView = layoutInflater.inflate(R.layout.fragment_floating_button_close, null);
 
         //Main widget layout params
         mButtonLayoutParams = new WindowManager.LayoutParams(
                 // Shrink window to wrap content not fill the screen
                 WindowManager.LayoutParams.WRAP_CONTENT, WindowManager.LayoutParams.WRAP_CONTENT,
                 // Overlay/Draw on top of other application windows
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-                        : WindowManager.LayoutParams.TYPE_PHONE,
+                overlayType(),
                 // Don't let it grab the input focus
                 WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
                 // Make the underlying application window visible
@@ -101,12 +101,11 @@ public class SoftPowerButtonWindow {
         //Dialog widget layout params
         mDialogLayoutParams = new WindowManager.LayoutParams(
                 // Shrink window to wrap content not fill the screen
-                WindowManager.LayoutParams.MATCH_PARENT, ViewGroup.LayoutParams.MATCH_PARENT,
+                WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
                 // Overlay/Draw on top of other application windows
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-                        : WindowManager.LayoutParams.TYPE_PHONE,
+                overlayType(),
                 // Don't let it grab the input focus
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                fullScreenFlags(),
                 // Make the underlying application window visible
                 // through any transparent parts
                 PixelFormat.TRANSLUCENT);
@@ -117,12 +116,11 @@ public class SoftPowerButtonWindow {
         //Widget close params
         mCloseLayoutParams = new WindowManager.LayoutParams(
                 // Shrink window to 100px
-                100, 100,
+                WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
                 // Overlay/Draw on top of other application windows
-                Build.VERSION.SDK_INT >= Build.VERSION_CODES.O ? WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
-                        : WindowManager.LayoutParams.TYPE_PHONE,
+                overlayType(),
                 // Don't let it grab the input focus
-                WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE,
+                fullScreenFlags(),
                 // Make the underlying application window visible
                 // through any transparent parts
                 PixelFormat.TRANSLUCENT);
@@ -150,9 +148,10 @@ public class SoftPowerButtonWindow {
                 .getDisplayMetrics()
                 .density;
 
-        mCloseView = new ImageView(context);
-        mCloseView.setImageResource(R.drawable.ic_action_close);
+        //mCloseView = new ImageView(context);
+        //mCloseView.setImageResource(R.drawable.ic_action_close);
         mCloseView.setVisibility(View.INVISIBLE);
+        mCloseIcon = mCloseView.findViewById(R.id.close);
 
         //floatingCardView.setOnClickListener(view -> mDPM.lockNow());
 
@@ -261,6 +260,26 @@ public class SoftPowerButtonWindow {
 
     private int dpToPx(int dp, float density) {
         return Math.round((float) dp * density);
+    }
+
+    private int overlayType() {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) return WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
+        else return WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
+    }
+
+    private int fullScreenFlags() {
+        return WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                WindowManager.LayoutParams.FLAG_FULLSCREEN |
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN;
+    }
+
+    private int fullScreenFlags1() {
+        return WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE |
+                WindowManager.LayoutParams.FLAG_FULLSCREEN |
+                WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN |
+                WindowManager.LayoutParams.FLAG_LAYOUT_NO_LIMITS |
+                WindowManager.LayoutParams.FLAG_LAYOUT_INSET_DECOR |
+                WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL;
     }
 
     private void showEnableAccessibilityServiceDialog(Context context) {
@@ -483,12 +502,12 @@ public class SoftPowerButtonWindow {
 
                         floatingButtonMoving = true;
 
-                        if (isWithinViewBounds(mCloseView, mFloatingButtonView)) {
+                        if (isWithinViewBounds(mCloseIcon, mFloatingButtonView)) {
                             inClosePos = true;
-                            mCloseView.setImageResource(R.drawable.ic_action_close_red);
+                            mCloseIcon.setImageResource(R.drawable.ic_action_close_red);
                         } else {
                             inClosePos = false;
-                            mCloseView.setImageResource(R.drawable.ic_action_close);
+                            mCloseIcon.setImageResource(R.drawable.ic_action_close);
                         }
 
                         return true;
