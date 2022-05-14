@@ -3,12 +3,16 @@ package dev.eseudom.softpowerbutton.util
 import android.Manifest
 import android.accessibilityservice.AccessibilityService
 import android.app.ActivityManager
+import android.app.AlarmManager
+import android.app.PendingIntent
+import android.app.Service
 import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.os.SystemClock
 import android.provider.Settings
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -54,12 +58,14 @@ class U {
         fun sendAccessibilityLockScreenBroadcast(context: Context) {
             val intent = Intent(ACTION_ACCESSIBILITY_LOCK_SCREEN)
             intent.putExtra(INTENT_EXTRA_ACTION, AccessibilityService.GLOBAL_ACTION_LOCK_SCREEN)
+            intent.flags = Intent.FLAG_RECEIVER_FOREGROUND
             context.sendBroadcast(intent)
         }
 
         fun sendAccessibilityPowerDialogBroadcast(context: Context) {
             val intent = Intent(ACTION_ACCESSIBILITY_GLOBAL_ACTIONS_DIALOG)
             intent.putExtra(INTENT_EXTRA_ACTION, AccessibilityService.GLOBAL_ACTION_POWER_DIALOG)
+            intent.flags = Intent.FLAG_RECEIVER_FOREGROUND
             context.sendBroadcast(intent)
         }
 
@@ -67,6 +73,7 @@ class U {
         fun sendAccessibilityScreenshotBroadcast(context: Context) {
             val intent = Intent(ACTION_ACCESSIBILITY_SCREENSHOT)
             intent.putExtra(INTENT_EXTRA_ACTION, AccessibilityService.GLOBAL_ACTION_TAKE_SCREENSHOT)
+            intent.flags = Intent.FLAG_RECEIVER_FOREGROUND
             context.sendBroadcast(intent)
         }
 
@@ -205,6 +212,29 @@ class U {
         fun getXiaomiPermissionRequestStatus(context: Context): Boolean {
             return context.getSharedPreferences(context.getString(R.string.preference_file_key), Context.MODE_PRIVATE)
                 .getBoolean(context.getString(R.string.xiaomi_permission_request_status), false)
+        }
+
+        fun addServiceRestarter(service: Service) {
+            val restartService = Intent(
+                service.applicationContext,
+                service::class.java
+            )
+            Log.e(tag, "Service to be restarted: ${service::class.java}")
+            restartService.setPackage(service.packageName)
+            val pendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+                PendingIntent.getService(
+                    service.applicationContext, 1, restartService,
+                    PendingIntent.FLAG_ONE_SHOT or PendingIntent.FLAG_IMMUTABLE
+                )
+            } else {
+                PendingIntent.getService(
+                    service.applicationContext, 1, restartService,
+                    PendingIntent.FLAG_ONE_SHOT
+                )
+            }
+            val alarmService =
+                service.applicationContext.getSystemService(Context.ALARM_SERVICE) as AlarmManager
+            alarmService.set(AlarmManager.ELAPSED_REALTIME, SystemClock.elapsedRealtime() + 10000, pendingIntent)
         }
     }
 }

@@ -5,6 +5,7 @@ import static android.content.Intent.ACTION_SCREEN_OFF;
 import static android.content.Intent.ACTION_SCREEN_ON;
 import static dev.eseudom.softpowerbutton.util.C.ACTION_CLOSE_FLOATING_WIDGET;
 
+import android.app.AlarmManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
@@ -22,6 +23,7 @@ import android.os.Binder;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.PowerManager;
+import android.os.SystemClock;
 import android.support.v4.media.session.MediaSessionCompat;
 import android.support.v4.media.session.PlaybackStateCompat;
 import android.util.Log;
@@ -56,47 +58,39 @@ public class FloatingWindowService extends Service {
     private ComponentName mSPBDeviceAdmin;
 
     private boolean mIsVolumeReleased = true;
-
-    public class ServiceBinder extends Binder {
-        public FloatingWindowService getService() {
-            return FloatingWindowService.this;
-        }
-    }
-
-    private final ServiceBinder binder = new ServiceBinder();
+    private boolean internalDestroy = false;
 
     @Override
     public void onCreate() {
         instance = this;
-        //startForeground(C.FLOATING_BUTTON_NOTIFICATION_ID, getSoftPowerButtonNotification());
+        startForeground(C.FLOATING_BUTTON_NOTIFICATION_ID, getSoftPowerButtonNotification());
     }
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        //startForeground(C.FLOATING_BUTTON_NOTIFICATION_ID, getSoftPowerButtonNotification());
+        startForeground(C.FLOATING_BUTTON_NOTIFICATION_ID, getSoftPowerButtonNotification());
 
-        if (intent != null) {
-            mSoftPowerButtonWindow = new SoftPowerButtonWindow(this);
-            //mFloatingWindow.setCapturePermIntent(intent.getParcelableExtra(C.PERMISSION_DATA),
-                    //intent.getIntExtra(C.RESULT_CODE, Activity.RESULT_CANCELED));
-            mSoftPowerButtonWindow.show();
+        mSoftPowerButtonWindow = new SoftPowerButtonWindow(this);
+        //mFloatingWindow.setCapturePermIntent(intent.getParcelableExtra(C.PERMISSION_DATA),
+        //intent.getIntExtra(C.RESULT_CODE, Activity.RESULT_CANCELED));
+        mSoftPowerButtonWindow.show();
 
-            mDPM = (DevicePolicyManager) getSystemService(DEVICE_POLICY_SERVICE);
-            mSPBDeviceAdmin = new ComponentName(this, FloatingWindowService.SPBDeviceAdminReceiver.class);
+        mDPM = (DevicePolicyManager) getSystemService(DEVICE_POLICY_SERVICE);
+        mSPBDeviceAdmin = new ComponentName(this, FloatingWindowService.SPBDeviceAdminReceiver.class);
 
-            //for accessibility service power menu
-            U.Companion.setComponentEnabled(this, SPBAccessibilityService.class, true);
-            U.Companion.enableAccessibilityService(this, U.Companion.isAccessibilityServiceRunning(this));
+        //for accessibility service power menu
+        U.Companion.setComponentEnabled(this, SPBAccessibilityService.class, true);
+        U.Companion.enableAccessibilityService(this, U.Companion.isAccessibilityServiceRunning(this));
 
-            mPowerManager = (PowerManager) getSystemService(POWER_SERVICE);
-            mWakeLock = mPowerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP), TAG);
-            mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
-            startMediaSessionVolumeKeyListener();
+        mPowerManager = (PowerManager) getSystemService(POWER_SERVICE);
+        mWakeLock = mPowerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP), TAG);
+        mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+        startMediaSessionVolumeKeyListener();
 
-            registerLocalReceiver();
+        registerLocalReceiver();
 
-            registerScreenStateReceiver();
-        } else return START_NOT_STICKY;
+        registerScreenStateReceiver();
+
         return START_STICKY;
     }
 
@@ -115,40 +109,40 @@ public class FloatingWindowService extends Service {
         mVolumeProvider = new VolumeProviderCompat(VolumeProviderCompat.VOLUME_CONTROL_RELATIVE,
                 /*max volume*/streamMaxVolume, /*initial volume level*/currentVolume) {
 
-                    @Override
-                    public void onAdjustVolume(int direction) {
+            @Override
+            public void onAdjustVolume(int direction) {
                         /* -1 -- volume down
                             1 -- volume up
                             0 -- volume button released */
-                            mWakeLock.acquire(1000L); /*1sec*/
-                            //mWakeLock.release();
-                        switch (direction) {
-                            case -1: {
-                                mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, 0);
-                                //if (getCurrentVolume() != 0)
-                                    //setCurrentVolume(getCurrentVolume() - 25);
-                                Log.e(TAG, "volume down");
-                                mIsVolumeReleased = false;
-                                break;
-                            }
-                            case 1: {
-                                mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, 0);
-                                //if (getCurrentVolume() != 100)
-                                    //setCurrentVolume(getCurrentVolume() + 25);
-                                Log.e(TAG, "volume up");
-                                mIsVolumeReleased = false;
-                                break;
-                            }
-                            case 0: {
-                                Log.e(TAG, "volume released");
-                                mIsVolumeReleased = true;
-                                break;
-                            }
-                        }
-
-                        setCurrentVolume(mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC));
+                mWakeLock.acquire(1000L); /*1sec*/
+                //mWakeLock.release();
+                switch (direction) {
+                    case -1: {
+                        mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, 0);
+                        //if (getCurrentVolume() != 0)
+                        //setCurrentVolume(getCurrentVolume() - 25);
+                        Log.e(TAG, "volume down");
+                        mIsVolumeReleased = false;
+                        break;
                     }
-                };
+                    case 1: {
+                        mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, 0);
+                        //if (getCurrentVolume() != 100)
+                        //setCurrentVolume(getCurrentVolume() + 25);
+                        Log.e(TAG, "volume up");
+                        mIsVolumeReleased = false;
+                        break;
+                    }
+                    case 0: {
+                        Log.e(TAG, "volume released");
+                        mIsVolumeReleased = true;
+                        break;
+                    }
+                }
+
+                setCurrentVolume(mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC));
+            }
+        };
 
         mMediaSession.setPlaybackToRemote(mVolumeProvider);
         mMediaSession.setActive(true);
@@ -170,6 +164,7 @@ public class FloatingWindowService extends Service {
                 final String action = intent.getAction();
                 switch (action) {
                     case ACTION_CLOSE_FLOATING_WIDGET: {
+                        internalDestroy = true;
                         int notificationId = C.FLOATING_BUTTON_NOTIFICATION_ID;
 
                         NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
@@ -303,7 +298,8 @@ public class FloatingWindowService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             return PendingIntent.getBroadcast(this, 12, closeIntent,
                     PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-        } else return PendingIntent.getBroadcast(this, 12, closeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        } else
+            return PendingIntent.getBroadcast(this, 12, closeIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private PendingIntent getSleepScreenActionPendingIntent() {
@@ -317,7 +313,8 @@ public class FloatingWindowService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             return PendingIntent.getBroadcast(this, 12, sleepIntent,
                     PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-        } else return PendingIntent.getBroadcast(this, 12, sleepIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        } else
+            return PendingIntent.getBroadcast(this, 12, sleepIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private PendingIntent getPowerMenuActionPendingIntent() {
@@ -331,7 +328,8 @@ public class FloatingWindowService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             return PendingIntent.getBroadcast(this, 12, powerMenuIntent,
                     PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-        } else return PendingIntent.getBroadcast(this, 12, powerMenuIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        } else
+            return PendingIntent.getBroadcast(this, 12, powerMenuIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     private PendingIntent getStopAllActionPendingIntent() {
@@ -345,7 +343,8 @@ public class FloatingWindowService extends Service {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             return PendingIntent.getBroadcast(this, 12, stopIntent,
                     PendingIntent.FLAG_IMMUTABLE | PendingIntent.FLAG_UPDATE_CURRENT);
-        } else return PendingIntent.getBroadcast(this, 12, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        } else
+            return PendingIntent.getBroadcast(this, 12, stopIntent, PendingIntent.FLAG_UPDATE_CURRENT);
     }
 
     public boolean isVolumeButtonReleased() {
@@ -364,7 +363,10 @@ public class FloatingWindowService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.d(TAG, "onDestroy called");
+        Log.e(TAG, "onDestroy");
+        if (!internalDestroy)
+            U.Companion.addServiceRestarter(this);
+
         if (mSoftPowerButtonWindow != null)
             mSoftPowerButtonWindow.close();
         if (mMediaSession != null)
@@ -374,10 +376,17 @@ public class FloatingWindowService extends Service {
         stopForeground(true);
     }
 
+    @Override
+    public void onTaskRemoved(Intent intent) {
+        Log.e(TAG, "onTaskRemoved");
+        U.Companion.addServiceRestarter(this);
+        super.onTaskRemoved(intent);
+    }
+
     @Nullable
     @Override
     public IBinder onBind(Intent intent) {
-        return binder;
+        return null;
     }
 
     public static class NotificationActionReceiver extends BroadcastReceiver {
@@ -388,7 +397,7 @@ public class FloatingWindowService extends Service {
             String action = intent.getAction();
             Log.d(TAG, "Action: " + action);
 
-            switch(action) {
+            switch (action) {
                 case C.ACTION_NOTIFICATION_CLOSE_FLOATING_WIDGET: {
                     stopWidgetService(intent, context);
                     break;
@@ -397,7 +406,8 @@ public class FloatingWindowService extends Service {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P && U.Companion.isAccessibilityServiceRunning(context)) {
                         if (U.Companion.isAccessibilityServiceRunning(context))
                             U.Companion.sendAccessibilityLockScreenBroadcast(context);
-                        else Toast.makeText(context, R.string.enable_accessibility_service_screen_lock, Toast.LENGTH_LONG).show();
+                        else
+                            Toast.makeText(context, R.string.enable_accessibility_service_screen_lock, Toast.LENGTH_LONG).show();
                     } else mDPM.lockNow();
                     break;
                 }
@@ -427,6 +437,7 @@ public class FloatingWindowService extends Service {
             notificationManager.cancel(null, notificationId);
 
             FloatingWindowService floatingService = FloatingWindowService.getInstance();
+            floatingService.internalDestroy = true;
             floatingService.stopForeground(true);
 
             floatingService.mSoftPowerButtonWindow.close();

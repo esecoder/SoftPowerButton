@@ -34,8 +34,6 @@ class MainActivity : AppCompatActivity() {
     private val mOverlayConfirmDialogFragment = OverlayPermissionDialogFragment()
     private val mEnableServiceDialogFragment = EnableServiceDialogFragment()
     private val mXiaomiDialogFragment = XiaomiPermissionDialogFragment()
-    private var mServiceConnection: ServiceConnection? = null
-    private var mFloatingWindowService: FloatingWindowService? = null
 
     private lateinit var mDPM: DevicePolicyManager
     private lateinit var mSPBDeviceAdmin: ComponentName
@@ -271,51 +269,9 @@ class MainActivity : AppCompatActivity() {
             .any { it.service.className == FloatingWindowService::class.java.name }
     }
 
-    //todo start service normally without binder
     private fun startFloatingWindowService() {
         val serviceIntent = Intent(this@MainActivity, FloatingWindowService::class.java)
-        //Service connection to bind the service to this context because of startForegroundService issues
-        mServiceConnection = object : ServiceConnection {
-
-            override fun onServiceConnected(name: ComponentName, service: IBinder) {
-                Log.d(tag, "Service connected")
-                val binder: FloatingWindowService.ServiceBinder =
-                    service as FloatingWindowService.ServiceBinder
-                mFloatingWindowService = binder.service
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(
-                    serviceIntent
-                )
-                else startService(serviceIntent)
-
-                mFloatingWindowService?.startForeground(
-                    C.FLOATING_BUTTON_NOTIFICATION_ID,
-                    mFloatingWindowService?.softPowerButtonNotification
-                )
-
-                //build media object (alternative architecture)
-                //val mediaData = MediaData(currentVideoURL, currentAudioURL, currentMediaPos, currentMediaTitle)
-                //mFloatingWindowService.startFloatingPlayer(mediaData)
-            }
-
-            override fun onBindingDied(name: ComponentName) {
-                Log.w(tag, "Binding has died.")
-            }
-
-            override fun onNullBinding(name: ComponentName) {
-                Log.w(tag, "Binding was null.")
-            }
-
-            override fun onServiceDisconnected(name: ComponentName) {
-                Log.w(tag, "Service is disconnected..")
-            }
-        }
-        try {
-            mServiceConnection?.let { bindService(serviceIntent, it, BIND_AUTO_CREATE) }
-        } catch (re: RuntimeException) {
-            re.printStackTrace()
-            //Use the normal way and accept it will fail sometimes
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(serviceIntent)
-            else startService(serviceIntent)
-        }
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) startForegroundService(serviceIntent)
+        else startService(serviceIntent)
     }
 }

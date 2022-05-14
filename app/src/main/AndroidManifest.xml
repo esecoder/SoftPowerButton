@@ -61,11 +61,14 @@
 
         <service
             android:name=".service.FloatingWindowService"
-            android:exported="false" />
+            android:exported="false"
+            android:stopWithTask="false"/>
+
         <service
             android:name=".service.SPBAccessibilityService"
             android:enabled="true"
             android:exported="true"
+            android:stopWithTask="false"
             android:permission="android.permission.BIND_ACCESSIBILITY_SERVICE">
             <intent-filter>
                 <action android:name="android.accessibilityservice.AccessibilityService" />
@@ -75,6 +78,7 @@
                 android:name="android.accessibilityservice"
                 android:resource="@xml/accessibility_service_config" />
         </service>
+
     </application>
 
 </manifest>

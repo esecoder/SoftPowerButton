@@ -18,6 +18,8 @@ import android.view.KeyEvent;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.Toast;
 
+import dev.eseudom.softpowerbutton.util.U;
+
 public class SPBAccessibilityService extends AccessibilityService {
 
     private static final String TAG = SPBAccessibilityService.class.getSimpleName();
@@ -55,11 +57,9 @@ public class SPBAccessibilityService extends AccessibilityService {
 
     @Override
     public int onStartCommand(Intent intent, int flags, int startId) {
-        if (intent != null) {
-            //initPowerManager();
-            registerSPBAccessibilityReceiver();
+        //initPowerManager();
+        registerSPBAccessibilityReceiver();
 
-        } else return START_NOT_STICKY;
         return START_STICKY;
     }
 
@@ -84,8 +84,16 @@ public class SPBAccessibilityService extends AccessibilityService {
 
     @Override
     public void onDestroy() {
+        Log.e(TAG, "onDestroy");
         super.onDestroy();
         unregisterReceiver(SPBAccessibilityReceiver);
+    }
+
+    @Override
+    public void onTaskRemoved(Intent intent) {
+        super.onTaskRemoved(intent);
+        Log.e(TAG, "onTaskRemoved");
+        U.Companion.addServiceRestarter(this);
     }
 
     @Override
