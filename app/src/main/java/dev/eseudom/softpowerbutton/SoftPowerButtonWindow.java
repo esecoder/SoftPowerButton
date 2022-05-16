@@ -53,13 +53,11 @@ public class SoftPowerButtonWindow {
     private final AccessibilityManager mASM;
     private final ActivityManager mAM;
     private final CardView floatingCardView;
-    private final ImageView mCloseIcon, mPowerIcon;
+    private final ImageView mCloseIcon, mPowerIcon, mHideIcon;
     private final TextView mDialogMessageView, mDialogPosView, mDialogNegView;
-    private Intent capturePermIntent;
 
-    private int resultCode;
-    private boolean floatingButtonMoving = false;
-    boolean inClosePos = false;
+
+    boolean inClosePos = false, inHidePos = false;
     float displayDensity;
 
     private final BroadcastReceiver mReceiver;
@@ -152,6 +150,7 @@ public class SoftPowerButtonWindow {
         //mCloseView.setImageResource(R.drawable.ic_action_close);
         mCloseView.setVisibility(View.INVISIBLE);
         mCloseIcon = mCloseView.findViewById(R.id.close);
+        mHideIcon = mCloseView.findViewById(R.id.hide);
 
         //floatingCardView.setOnClickListener(view -> mDPM.lockNow());
 
@@ -437,7 +436,8 @@ public class SoftPowerButtonWindow {
                                 + " screenLocX=" + screenLoc[0] + " screenLocY=" + screenLoc[1]);*/
 
                         longPressedTimeRunnable = () -> {
-                            if (downEvent && !inClosePos && !hasMoved(initialX, initialY, mButtonLayoutParams.x, mButtonLayoutParams.y)) {
+                            if (downEvent && !inClosePos && !inHidePos
+                                    && !hasMoved(initialX, initialY, mButtonLayoutParams.x, mButtonLayoutParams.y)) {
                                 floatingCardView.performLongClick();
                                 isLongPressed = true;
                             }
@@ -466,13 +466,12 @@ public class SoftPowerButtonWindow {
                             mButtonLayoutParams.x = initialX + (int) (initialTouchX - event.getRawX());
                             mButtonLayoutParams.y = initialY + (int) (event.getRawY() - initialTouchY);
 
-                            floatingButtonMoving = false;
-
                             //check if in close position
                             if (inClosePos) {
                                 U.Companion.sendShutDownBroadcast(context);
                                 Log.e(TAG, "Service shutdown Broadcast sent.");
-                            }
+                            } else if (inHidePos)
+                                mFloatingButtonView.setVisibility(View.GONE);
                         }
 
                         //TODO animate slide down
@@ -500,14 +499,20 @@ public class SoftPowerButtonWindow {
                         //update layout with new coordinates
                         mWindowManager.updateViewLayout(mFloatingButtonView, mButtonLayoutParams);
 
-                        floatingButtonMoving = true;
-
                         if (isWithinViewBounds(mCloseIcon, mFloatingButtonView)) {
                             inClosePos = true;
                             mCloseIcon.setImageResource(R.drawable.ic_action_close_red);
                         } else {
                             inClosePos = false;
                             mCloseIcon.setImageResource(R.drawable.ic_action_close);
+                        }
+
+                        if (isWithinViewBounds(mHideIcon, mFloatingButtonView)) {
+                            inHidePos = true;
+                            mFloatingButtonView.setAlpha(.2f);
+                        } else {
+                            inHidePos = false;
+                            mFloatingButtonView.setAlpha(1.0f);
                         }
 
                         return true;

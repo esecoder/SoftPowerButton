@@ -7,6 +7,16 @@
     android:background="@drawable/close_background_gradient">
 
     <ImageView
+        android:id="@+id/hide"
+        android:layout_width="50dp"
+        android:layout_height="50dp"
+        android:src="@drawable/ic_action_hide"
+        android:layout_marginBottom="100dp"
+        android:visibility="visible"
+        android:layout_above="@id/close"
+        android:layout_centerHorizontal="true"/>
+
+    <ImageView
         android:id="@+id/close"
         android:layout_width="50dp"
         android:layout_height="50dp"
