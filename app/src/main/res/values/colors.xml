@@ -13,4 +13,6 @@
     <color name="red">#FF0000</color>
     <color name="red_244_67_54">#F44336</color>
     <color name="black_A30">#4D000000</color>
+    <color name="grey">#404040</color>
+    <color name="grey_48_48_48">#303030</color>
 </resources>

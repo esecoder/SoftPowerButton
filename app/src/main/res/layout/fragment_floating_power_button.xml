@@ -9,7 +9,7 @@
         android:id="@+id/floatingCardView"
         android:layout_width="50dp"
         android:layout_height="50dp"
-        app:cardBackgroundColor="@color/cardview_selector"
+        app:cardBackgroundColor="@color/grey_background_selector"
         app:cardCornerRadius="50dp"
         app:cardElevation="5dp">
 
@@ -18,7 +18,7 @@
             android:layout_width="30dp"
             android:layout_height="30dp"
             android:layout_margin="10dp"
-            android:src="@drawable/ic_action_power" />
+            android:src="@drawable/ic_action_power_red" />
 
     </androidx.cardview.widget.CardView>
 

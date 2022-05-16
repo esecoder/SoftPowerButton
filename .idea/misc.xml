@@ -3,10 +3,17 @@
   <component name="DesignSurface">
     <option name="filePathToZoomLevelMap">
       <map>
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/drawable-anydpi/ic_action_power_red.xml" value="0.2203125" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/drawable-v24/button_darker_drawable.xml" value="0.2203125" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/drawable-v24/ic_launcher_foreground.xml" value="0.2203125" />
         <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/drawable/black_background_selector.xml" value="0.2203125" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/drawable/button_drawable.xml" value="0.2203125" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/drawable/button_selector.xml" value="0.2203125" />
         <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/drawable/close_background_gradient.xml" value="0.2203125" />
         <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/drawable/ic_baseline_stop_circle_24.xml" value="0.1125" />
         <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/drawable/ic_baseline_stop_circle_24_red.xml" value="0.1125" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/drawable/ic_group_8.xml" value="0.2203125" />
+        <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/drawable/ic_launcher_background.xml" value="0.2203125" />
         <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/layout-v21/fragment_notification_view_large.xml" value="0.1671195652173913" />
         <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/layout/activity_main.xml" value="0.1" />
         <entry key="..\:/Users/Ese Udom/SoftPowerButton/app/src/main/res/layout/activity_test.xml" value="0.14356884057971014" />
