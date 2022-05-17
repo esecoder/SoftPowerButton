@@ -482,7 +482,7 @@ public class SoftPowerButtonWindow {
                         mCloseView.setVisibility(View.GONE);
 
                         //minimize UI by 20%
-                        autoMinimizeButton(15000, dpToPx(40), dpToPx(40), floatingCardView,
+                        autoMinimizeButton(10000, dpToPx(40), dpToPx(40), floatingCardView,
                                 mPowerIcon);
 
                         return true;
