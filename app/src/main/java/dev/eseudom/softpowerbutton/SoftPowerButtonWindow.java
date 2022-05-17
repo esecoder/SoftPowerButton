@@ -57,7 +57,7 @@ public class SoftPowerButtonWindow {
     private final TextView mDialogMessageView, mDialogPosView, mDialogNegView;
 
 
-    boolean inClosePos = false, inHidePos = false;
+    boolean inClosePos = false, inHidePos = false, isButtonMoving = false;
     float displayDensity;
 
     private final BroadcastReceiver mReceiver;
@@ -212,10 +212,12 @@ public class SoftPowerButtonWindow {
     private void autoMinimizeButton(long delay, int mainWidth, int mainHeight,
                                     View mainView, View icon) {
         minimizeBtnTimeRunnable = () -> {
-            resizeView(mainWidth, mainHeight, mainView);
-            //20% reductions from original size of 30dp and margin of 10dp
-            resizeAndResetMarginView(dpToPx(24), dpToPx(24), dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8), icon);
-            mainView.setAlpha(0.5f); //make it faint a bit
+            if (!isButtonMoving) {
+                resizeView(mainWidth, mainHeight, mainView);
+                //20% reductions from original size of 30dp and margin of 10dp
+                resizeAndResetMarginView(dpToPx(24), dpToPx(24), dpToPx(8), dpToPx(8), dpToPx(8), dpToPx(8), icon);
+                mainView.setAlpha(0.5f); //make it faint a bit
+            }
         };
         new Handler().postDelayed(minimizeBtnTimeRunnable, delay);
     }
@@ -474,6 +476,8 @@ public class SoftPowerButtonWindow {
                                 mFloatingButtonView.setVisibility(View.GONE);
                         }
 
+                        isButtonMoving = false;
+
                         //TODO animate slide down
                         mCloseView.setVisibility(View.GONE);
 
@@ -498,6 +502,8 @@ public class SoftPowerButtonWindow {
 
                         //update layout with new coordinates
                         mWindowManager.updateViewLayout(mFloatingButtonView, mButtonLayoutParams);
+
+                        isButtonMoving = true;
 
                         if (isWithinViewBounds(mCloseIcon, mFloatingButtonView)) {
                             inClosePos = true;
