@@ -70,7 +70,7 @@ public class FloatingWindowService extends Service {
     public int onStartCommand(Intent intent, int flags, int startId) {
         startForeground(C.FLOATING_BUTTON_NOTIFICATION_ID, getSoftPowerButtonNotification());
 
-        mSoftPowerButtonWindow = new SoftPowerButtonWindow(this);
+        mSoftPowerButtonWindow = new SoftPowerButtonWindow(getApplicationContext());
         //mFloatingWindow.setCapturePermIntent(intent.getParcelableExtra(C.PERMISSION_DATA),
         //intent.getIntExtra(C.RESULT_CODE, Activity.RESULT_CANCELED));
         mSoftPowerButtonWindow.show();
@@ -367,8 +367,11 @@ public class FloatingWindowService extends Service {
         if (!internalDestroy)
             U.Companion.addServiceRestarter(this);
 
-        if (mSoftPowerButtonWindow != null)
+        if (mSoftPowerButtonWindow != null) {
             mSoftPowerButtonWindow.close();
+            mSoftPowerButtonWindow = null;
+        }
+
         if (mMediaSession != null)
             mMediaSession.release();
         LocalBroadcastManager.getInstance(this).unregisterReceiver(mLocalReceiver);
