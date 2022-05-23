@@ -45,17 +45,17 @@ public class SoftPowerButtonWindow {
 
     private final static String TAG = SoftPowerButtonWindow.class.getSimpleName();
     private final Context mContext;
-    private final View mFloatingButtonView, mFloatingDialogView, mCloseView;
-    private final WindowManager.LayoutParams mButtonLayoutParams, mCloseLayoutParams, mDialogLayoutParams;
+    private View mFloatingButtonView, mFloatingDialogView, mCloseView;
+    private WindowManager.LayoutParams mButtonLayoutParams, mCloseLayoutParams, mDialogLayoutParams;
     private final WindowManager mWindowManager;
     private final DevicePolicyManager mDPM;
     private final ComponentName mSPBDeviceAdmin;
     private final AccessibilityManager mASM;
     private final ActivityManager mAM;
-    private final CardView floatingCardView;
-    private final ImageView mCloseIcon, mPowerIcon, mHideIcon;
-    private final TextView mDialogMessageView, mDialogPosView, mDialogNegView;
-
+    private final LayoutInflater mLayoutInflater;
+    private CardView floatingCardView;
+    private ImageView mCloseIcon, mPowerIcon, mHideIcon;
+    private TextView mDialogMessageView, mDialogPosView, mDialogNegView;
 
     boolean inClosePos = false, inHidePos = false, isButtonMoving = false;
     float displayDensity;
@@ -68,10 +68,65 @@ public class SoftPowerButtonWindow {
     public SoftPowerButtonWindow(Context context) {
         mContext = context;
 
-        LayoutInflater layoutInflater = LayoutInflater.from(context);//(LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        mFloatingButtonView = layoutInflater.inflate(R.layout.fragment_floating_power_button, null);
+        mLayoutInflater = LayoutInflater.from(context);//(LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+
+        mWindowManager = (WindowManager) context.getSystemService(WINDOW_SERVICE);
+
+        mDPM = (DevicePolicyManager) context.getSystemService(DEVICE_POLICY_SERVICE);
+        mSPBDeviceAdmin = new ComponentName(context, FloatingWindowService.SPBDeviceAdminReceiver.class);
+
+        mAM = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+
+        mASM = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        //for accessibility service power menu
+        U.Companion.setComponentEnabled(context, SPBAccessibilityService.class, true);
+        U.Companion.enableAccessibilityService(context, U.Companion.isAccessibilityServiceRunning(context));
+
+        displayDensity = context.getResources()
+                .getDisplayMetrics()
+                .density;
+
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(ACTION_SHOW_FLOATING_GUIDE_DIALOG);
+
+        mReceiver = getBroadcastReceiver();
+        LocalBroadcastManager.getInstance(context).registerReceiver(mReceiver, filter);
+
+        initFloatingButton(mLayoutInflater, context);
+        initFloatingDialog(mLayoutInflater);
+        initFloatingClose(mLayoutInflater);
+    }
+
+    private void initFloatingDialog(LayoutInflater layoutInflater) {
         mFloatingDialogView = layoutInflater.inflate(R.layout.fragment_floating_alert_dialog, null);
-        mCloseView = layoutInflater.inflate(R.layout.fragment_floating_button_close, null);
+
+        //Dialog widget layout params
+        mDialogLayoutParams = new WindowManager.LayoutParams(
+                // Shrink window to wrap content not fill the screen
+                WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
+                // Overlay/Draw on top of other application windows
+                overlayType(),
+                // Don't let it grab the input focus
+                fullScreenFlags(),
+                // Make the underlying application window visible
+                // through any transparent parts
+                PixelFormat.TRANSLUCENT);
+
+        // position of window within screen
+        mDialogLayoutParams.gravity = Gravity.CENTER;
+
+        ImageView mDialogCloseView = mFloatingDialogView.findViewById(R.id.dialogClose);
+        mDialogCloseView.setOnClickListener(view -> closeDialog());
+        mDialogMessageView = mFloatingDialogView.findViewById(R.id.dialogMessage);
+        mDialogPosView = mFloatingDialogView.findViewById(R.id.positiveBtn);
+        mDialogPosView.setOnClickListener(view -> closeDialog());
+        mDialogNegView = mFloatingDialogView.findViewById(R.id.negativeBtn);
+        mDialogNegView.setOnClickListener(view -> closeDialog());
+    }
+
+    private void initFloatingButton(LayoutInflater layoutInflater, Context context) {
+        mFloatingButtonView = layoutInflater.inflate(R.layout.fragment_floating_power_button, null);
 
         //Main widget layout params
         mButtonLayoutParams = new WindowManager.LayoutParams(
@@ -96,61 +151,8 @@ public class SoftPowerButtonWindow {
         //mParams.horizontalMargin = 20.0f;
         //mParams.verticalMargin = 20.0f;
 
-        //Dialog widget layout params
-        mDialogLayoutParams = new WindowManager.LayoutParams(
-                // Shrink window to wrap content not fill the screen
-                WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
-                // Overlay/Draw on top of other application windows
-                overlayType(),
-                // Don't let it grab the input focus
-                fullScreenFlags(),
-                // Make the underlying application window visible
-                // through any transparent parts
-                PixelFormat.TRANSLUCENT);
-
-        // position of window within screen
-        mDialogLayoutParams.gravity = Gravity.CENTER;
-
-        //Widget close params
-        mCloseLayoutParams = new WindowManager.LayoutParams(
-                // Shrink window to 100px
-                WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
-                // Overlay/Draw on top of other application windows
-                overlayType(),
-                // Don't let it grab the input focus
-                fullScreenFlags(),
-                // Make the underlying application window visible
-                // through any transparent parts
-                PixelFormat.TRANSLUCENT);
-
-        // position of window within screen
-        mCloseLayoutParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
-        mCloseLayoutParams.y = 100;
-
-        mWindowManager = (WindowManager) context.getSystemService(WINDOW_SERVICE);
-
-        mDPM = (DevicePolicyManager) context.getSystemService(DEVICE_POLICY_SERVICE);
-        mSPBDeviceAdmin = new ComponentName(context, FloatingWindowService.SPBDeviceAdminReceiver.class);
-
-        mAM = (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
-
-        mASM = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
-        //for accessibility service power menu
-        U.Companion.setComponentEnabled(context, SPBAccessibilityService.class, true);
-        U.Companion.enableAccessibilityService(context, U.Companion.isAccessibilityServiceRunning(context));
-
         floatingCardView = mFloatingButtonView.findViewById(R.id.floatingCardView);
         mPowerIcon = mFloatingButtonView.findViewById(R.id.power);
-
-        displayDensity = context.getResources()
-                .getDisplayMetrics()
-                .density;
-
-        //mCloseView = new ImageView(context);
-        //mCloseView.setImageResource(R.drawable.ic_action_close);
-        mCloseView.setVisibility(View.INVISIBLE);
-        mCloseIcon = mCloseView.findViewById(R.id.close);
-        mHideIcon = mCloseView.findViewById(R.id.hide);
 
         //floatingCardView.setOnClickListener(view -> mDPM.lockNow());
 
@@ -188,20 +190,32 @@ public class SoftPowerButtonWindow {
         });
 
         floatingCardView.setOnTouchListener(getFloatingViewTouchListener(context));
+    }
 
-        ImageView mDialogCloseView = mFloatingDialogView.findViewById(R.id.dialogClose);
-        mDialogCloseView.setOnClickListener(view -> closeDialog());
-        mDialogMessageView = mFloatingDialogView.findViewById(R.id.dialogMessage);
-        mDialogPosView = mFloatingDialogView.findViewById(R.id.positiveBtn);
-        mDialogPosView.setOnClickListener(view -> closeDialog());
-        mDialogNegView = mFloatingDialogView.findViewById(R.id.negativeBtn);
-        mDialogNegView.setOnClickListener(view -> closeDialog());
+    private void initFloatingClose(LayoutInflater layoutInflater) {
+        mCloseView = layoutInflater.inflate(R.layout.fragment_floating_button_close, null);
 
-        IntentFilter filter = new IntentFilter();
-        filter.addAction(ACTION_SHOW_FLOATING_GUIDE_DIALOG);
+        //Widget close params
+        mCloseLayoutParams = new WindowManager.LayoutParams(
+                // Shrink window to 100px
+                WindowManager.LayoutParams.MATCH_PARENT, WindowManager.LayoutParams.MATCH_PARENT,
+                // Overlay/Draw on top of other application windows
+                overlayType(),
+                // Don't let it grab the input focus
+                fullScreenFlags(),
+                // Make the underlying application window visible
+                // through any transparent parts
+                PixelFormat.TRANSLUCENT);
 
-        mReceiver = getBroadcastReceiver();
-        LocalBroadcastManager.getInstance(context).registerReceiver(mReceiver, filter);
+        // position of window within screen
+        mCloseLayoutParams.gravity = Gravity.BOTTOM | Gravity.CENTER_HORIZONTAL;
+        mCloseLayoutParams.y = 100;
+
+        //mCloseView = new ImageView(context);
+        //mCloseView.setImageResource(R.drawable.ic_action_close);
+        mCloseView.setVisibility(View.INVISIBLE);
+        mCloseIcon = mCloseView.findViewById(R.id.close);
+        mHideIcon = mCloseView.findViewById(R.id.hide);
     }
 
     private void hideFloatingButtonTimed(long delay) {
@@ -299,6 +313,7 @@ public class SoftPowerButtonWindow {
                     final int extra = intent.getIntExtra(INTENT_EXTRA_DIALOG_TYPE, ACCESSIBILITY_SETTINGS_GUIDE);
                     switch (action) {
                         case ACTION_SHOW_FLOATING_GUIDE_DIALOG: {
+                            //inflate dialog here to avoid memory leaks
                             if (extra == ACCESSIBILITY_SETTINGS_GUIDE) {
                                 mDialogMessageView.setText(R.string.accessibility_guide);
                                 mDialogPosView.setText(R.string.ok);
@@ -359,7 +374,6 @@ public class SoftPowerButtonWindow {
 
     public void close() {
         try {
-
             // remove the floating view from the window
             mWindowManager.removeView(mFloatingButtonView);
             // invalidate the view
@@ -394,7 +408,7 @@ public class SoftPowerButtonWindow {
             // invalidate the view
             mFloatingDialogView.invalidate();
             // remove all views
-            //((ViewGroup) mView.getParent()).removeAllViews();
+            //((ViewGroup) mFloatingDialogView.getParent()).removeAllViews();
         } catch (Exception e) {
             e.printStackTrace();
             Log.d(TAG, e.getMessage());
