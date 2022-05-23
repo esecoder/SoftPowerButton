@@ -6,11 +6,9 @@ import android.app.admin.DevicePolicyManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
-import android.content.ServiceConnection
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
-import android.os.IBinder
 import android.provider.Settings
 import android.util.Log
 import android.widget.Toast
@@ -21,7 +19,6 @@ import dev.eseudom.softpowerbutton.dialog.EnableServiceDialogFragment
 import dev.eseudom.softpowerbutton.dialog.OverlayPermissionDialogFragment
 import dev.eseudom.softpowerbutton.dialog.XiaomiPermissionDialogFragment
 import dev.eseudom.softpowerbutton.service.FloatingWindowService
-import dev.eseudom.softpowerbutton.util.C
 import dev.eseudom.softpowerbutton.util.C.ACCESSIBILITY_SETTINGS_GUIDE
 import dev.eseudom.softpowerbutton.util.C.GENERAL_INSTRUCTIONS
 import dev.eseudom.softpowerbutton.util.C.INTENT_EXTRA_CONFIRM_ENABLE_SERVICE
@@ -30,10 +27,6 @@ import dev.eseudom.softpowerbutton.util.U
 class MainActivity : AppCompatActivity() {
 
     private val tag = MainActivity::class.java.simpleName
-
-    private val mOverlayConfirmDialogFragment = OverlayPermissionDialogFragment()
-    private val mEnableServiceDialogFragment = EnableServiceDialogFragment()
-    private val mXiaomiDialogFragment = XiaomiPermissionDialogFragment()
 
     private lateinit var mDPM: DevicePolicyManager
     private lateinit var mSPBDeviceAdmin: ComponentName
@@ -193,20 +186,23 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun showEnableAccessibilityDialog(message: String) {
-        if (!mEnableServiceDialogFragment.isShown() || !mEnableServiceDialogFragment.isAdded
-            || !mEnableServiceDialogFragment.isVisible) {
+        val enableServiceDialogFragment = EnableServiceDialogFragment()
+        if (!enableServiceDialogFragment.isShown() || !enableServiceDialogFragment.isAdded
+            || !enableServiceDialogFragment.isVisible) {
 
-            mEnableServiceDialogFragment.setMessage(message)
-            mEnableServiceDialogFragment.setListenerPos { _, _ ->
+            enableServiceDialogFragment.setMessage(message)
+            enableServiceDialogFragment.setListenerPos { dialog, _ ->
                 startAccessibilityServiceForResult()
 
                 U.sendShowFloatingDialogGuide(ACCESSIBILITY_SETTINGS_GUIDE, this)
+                dialog.dismiss()
             }
-            mEnableServiceDialogFragment.setListenerNeg { _, _ ->
+            enableServiceDialogFragment.setListenerNeg { dialog, _ ->
                 onBackPressed()
+                dialog.dismiss()
             }
-            mEnableServiceDialogFragment.show(supportFragmentManager, "AlertDialog")
-            mEnableServiceDialogFragment.setShown(true)
+            enableServiceDialogFragment.show(supportFragmentManager, "AlertDialog")
+            enableServiceDialogFragment.setShown(true)
         }
     }
 
@@ -227,32 +223,38 @@ class MainActivity : AppCompatActivity() {
 
     @RequiresApi(Build.VERSION_CODES.M)
     private fun showOverlayPermissionDialog() {
-        if (!mOverlayConfirmDialogFragment.isShown() || !mOverlayConfirmDialogFragment.isAdded
-            || !mOverlayConfirmDialogFragment.isVisible) {
+        val overlayConfirmDialogFragment = OverlayPermissionDialogFragment()
+        if (!overlayConfirmDialogFragment.isShown() || !overlayConfirmDialogFragment.isAdded
+            || !overlayConfirmDialogFragment.isVisible) {
 
-            mOverlayConfirmDialogFragment.setListenerPos { _, _ ->
+            overlayConfirmDialogFragment.setListenerPos { dialog, _ ->
                 getDrawOverlaysPermission()
+                dialog.dismiss()
             }
-            mOverlayConfirmDialogFragment.setListenerNeg { _, _ ->
+            overlayConfirmDialogFragment.setListenerNeg { dialog, _ ->
                 onBackPressed()
+                dialog.dismiss()
             }
-            mOverlayConfirmDialogFragment.show(supportFragmentManager, "AlertDialog")
-            mOverlayConfirmDialogFragment.setShown(true)
+            overlayConfirmDialogFragment.show(supportFragmentManager, "AlertDialog")
+            overlayConfirmDialogFragment.setShown(true)
         }
     }
 
     private fun showXiaomiPermissionDialog() {
-        if (!mXiaomiDialogFragment.isShown() || !mXiaomiDialogFragment.isAdded
-            || !mXiaomiDialogFragment.isVisible) {
+        val xiaomiDialogFragment = XiaomiPermissionDialogFragment()
+        if (!xiaomiDialogFragment.isShown() || !xiaomiDialogFragment.isAdded
+            || !xiaomiDialogFragment.isVisible) {
 
-            mXiaomiDialogFragment.setListenerPos { _, _ ->
+            xiaomiDialogFragment.setListenerPos { dialog, _ ->
                 U.launchXiaomiPermissions(this)
+                dialog.dismiss()
             }
-            mXiaomiDialogFragment.setListenerNeg { _, _ ->
+            xiaomiDialogFragment.setListenerNeg { dialog, _ ->
                 onBackPressed()
+                dialog.dismiss()
             }
-            mXiaomiDialogFragment.show(supportFragmentManager, "AlertDialog")
-            mXiaomiDialogFragment.setShown(true)
+            xiaomiDialogFragment.show(supportFragmentManager, "AlertDialog")
+            xiaomiDialogFragment.setShown(true)
 
             U.saveXiaomiPermissionRequestStatus(true, this)
         }
