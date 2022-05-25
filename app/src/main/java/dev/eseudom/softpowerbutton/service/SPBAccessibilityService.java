@@ -84,7 +84,6 @@ public class SPBAccessibilityService extends AccessibilityService {
 
     @Override
     public void onDestroy() {
-        Log.e(TAG, "onDestroy");
         super.onDestroy();
         unregisterReceiver(SPBAccessibilityReceiver);
     }
@@ -92,7 +91,6 @@ public class SPBAccessibilityService extends AccessibilityService {
     @Override
     public void onTaskRemoved(Intent intent) {
         super.onTaskRemoved(intent);
-        Log.e(TAG, "onTaskRemoved");
         U.Companion.addServiceRestarter(this);
     }
 

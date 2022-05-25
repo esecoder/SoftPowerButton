@@ -485,7 +485,6 @@ public class SoftPowerButtonWindow {
                             //check if in close position
                             if (inClosePos) {
                                 U.Companion.sendShutDownBroadcast(context);
-                                Log.e(TAG, "Service shutdown Broadcast sent.");
                             } else if (inHidePos)
                                 mFloatingButtonView.setVisibility(View.GONE);
                         }

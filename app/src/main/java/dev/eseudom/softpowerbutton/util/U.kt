@@ -219,7 +219,7 @@ class U {
                 service.applicationContext,
                 service::class.java
             )
-            Log.e(tag, "Service to be restarted: ${service::class.java}")
+            //Log.e(tag, "Service to be restarted: ${service::class.java}")
             restartService.setPackage(service.packageName)
             val pendingIntent: PendingIntent = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 PendingIntent.getService(

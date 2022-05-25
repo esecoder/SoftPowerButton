@@ -121,7 +121,6 @@ public class FloatingWindowService extends Service {
                         mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_LOWER, 0);
                         //if (getCurrentVolume() != 0)
                         //setCurrentVolume(getCurrentVolume() - 25);
-                        Log.e(TAG, "volume down");
                         mIsVolumeReleased = false;
                         break;
                     }
@@ -129,12 +128,10 @@ public class FloatingWindowService extends Service {
                         mAudioManager.adjustStreamVolume(AudioManager.STREAM_MUSIC, AudioManager.ADJUST_RAISE, 0);
                         //if (getCurrentVolume() != 100)
                         //setCurrentVolume(getCurrentVolume() + 25);
-                        Log.e(TAG, "volume up");
                         mIsVolumeReleased = false;
                         break;
                     }
                     case 0: {
-                        Log.e(TAG, "volume released");
                         mIsVolumeReleased = true;
                         break;
                     }
@@ -352,7 +349,6 @@ public class FloatingWindowService extends Service {
     }
 
     public void stopService() {
-        Log.d(TAG, "Stop service called");
         mSoftPowerButtonWindow.close();
         mSoftPowerButtonWindow = null;
         if (mMediaSession != null)
@@ -363,7 +359,6 @@ public class FloatingWindowService extends Service {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        Log.e(TAG, "onDestroy");
         if (!internalDestroy)
             U.Companion.addServiceRestarter(this);
 
@@ -381,7 +376,6 @@ public class FloatingWindowService extends Service {
 
     @Override
     public void onTaskRemoved(Intent intent) {
-        Log.e(TAG, "onTaskRemoved");
         U.Companion.addServiceRestarter(this);
         super.onTaskRemoved(intent);
     }
@@ -396,9 +390,7 @@ public class FloatingWindowService extends Service {
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            Log.d(TAG, "Stop action receiver started");
             String action = intent.getAction();
-            Log.d(TAG, "Action: " + action);
 
             switch (action) {
                 case C.ACTION_NOTIFICATION_CLOSE_FLOATING_WIDGET: {
@@ -434,8 +426,6 @@ public class FloatingWindowService extends Service {
                 notificationId = intent.getExtras().getInt(EXTRA_NOTIFICATION_ID);
             else notificationId = C.FLOATING_BUTTON_NOTIFICATION_ID;
 
-            Log.d(TAG, "Extra Noti Id: " + notificationId);
-
             NotificationManagerCompat notificationManager = NotificationManagerCompat.from(context);
             notificationManager.cancel(null, notificationId);
 
@@ -445,8 +435,6 @@ public class FloatingWindowService extends Service {
 
             floatingService.mSoftPowerButtonWindow.close();
             floatingService.stopService();
-
-            Log.d(TAG, "Stop action receiver ended");
         }
     }
 

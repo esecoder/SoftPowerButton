@@ -91,7 +91,6 @@ class MainActivity : AppCompatActivity() {
             }
 
         } else {
-            Log.e(tag, "showing enable service dialog")
             showEnableAccessibilityDialog(getString(R.string.accessibility_service_not_enabled))
         }
 
@@ -100,7 +99,6 @@ class MainActivity : AppCompatActivity() {
 
     override fun onNewIntent(intent: Intent?) {
         super.onNewIntent(intent)
-        Log.e(tag, "New Intent")
         setIntent(intent)
         onResume()
     }

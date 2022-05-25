@@ -12,10 +12,6 @@ class StopAccessibilityActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
-        Log.e(tag, "Stop accessibility intent received")
-
-
         U.sendStopAccessibilityServiceBroadcast(this)
         U.sendShutDownBroadcast(this)
         U.disableDeviceAdmin(this)
