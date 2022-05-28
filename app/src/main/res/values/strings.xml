@@ -27,7 +27,7 @@
     <string name="accessibility_service_instr">To show the power menu for restart, etc, enable accessibility service for this app.</string>
     <string name="accessibility_not_enabled_warning">Accessibility service for SoftPowerButton needs to be enabled to be able to show power menu, lock screen and listen to volume keys</string>
     <string name="cancel">Cancel</string>
-    <string name="accessibility_guide">If you are on the accessibility settings page, go to \'More downloaded services\' or \'Downloaded apps\' and locate SoftPowerButton. Click on it and enable it\'s accessibility service.</string>
+    <string name="accessibility_guide">If you are on the accessibility settings page, go to \'More downloaded services\' or \'Downloaded apps\' or \'Installed services\' and locate SoftPowerButton. Click on it and enable it\'s accessibility service.</string>
     <string name="floating_dialog_close_error">Failed to close floating dialog window.</string>
     <string name="floating_dialog_window_launch_error">Failed to launch floating dialog.</string>
     <string name="sleep_screen">Sleep</string>
