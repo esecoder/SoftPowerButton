@@ -104,9 +104,9 @@ class MainActivity : AppCompatActivity() {
     }
 
     private fun checkToExitActivity() {
-        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) { //less then android P devices
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) { //less than android P devices
 
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { //greater then android M devices
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { //greater than android M devices
                 if (Settings.canDrawOverlays(this) && isActiveAdmin() && U.isAccessibilityServiceRunning(this)) {
                     finalActions()
                 }
@@ -115,7 +115,7 @@ class MainActivity : AppCompatActivity() {
                     finalActions()
                 }
             }
-        } else { //greater then android P devices
+        } else { //greater than or equal to android P devices
             if (Settings.canDrawOverlays(this) && U.isAccessibilityServiceRunning(this)) {
                 finalActions()
             }
