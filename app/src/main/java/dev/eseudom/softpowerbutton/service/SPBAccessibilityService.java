@@ -44,11 +44,6 @@ public class SPBAccessibilityService extends AccessibilityService {
                     } else stopSelf();
                     break;
                 }
-                case ACTION_ACCESSIBILITY_SERVICE_PING: {
-                    //respond to ping
-                    U.Companion.sendAccessibilityServicePong(context);
-                    break;
-                }
             }
         }
     };

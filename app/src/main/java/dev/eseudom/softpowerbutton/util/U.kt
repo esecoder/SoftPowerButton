@@ -154,18 +154,6 @@ class U {
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
         }
 
-        fun sendAccessibilityServicePing(context: Context) {
-            val intent = Intent(C.ACTION_ACCESSIBILITY_SERVICE_PING)
-            context.sendBroadcast(intent)
-        }
-
-        fun sendAccessibilityServicePong(context: Context) {
-            val intent = Intent(C.ACTION_ACCESSIBILITY_SERVICE_PONG)
-            //I can't tell what it'll need really. so both
-            LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
-            context.sendBroadcast(intent)
-        }
-
         fun disableDeviceAdmin(context: Context) {
             val mDPM = context.getSystemService(AppCompatActivity.DEVICE_POLICY_SERVICE) as DevicePolicyManager
             val mSPBDeviceAdmin = ComponentName(context, FloatingWindowService.SPBDeviceAdminReceiver::class.java)

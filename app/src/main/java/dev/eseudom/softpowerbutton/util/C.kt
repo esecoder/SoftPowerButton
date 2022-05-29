@@ -22,8 +22,6 @@ object C {
     const val ACTION_ACCESSIBILITY_DISABLE_SERVICE_SHORTCUT = "dev.eseudom.softpowerbutton.intent.action.STOP_ACCESSIBILITY_SERVICE"
 
     const val ACTION_RESTART_ACCESSIBILITY = "dev.eseudom.softpowerbutton.util.constants.ACTION_RESTART_ACCESSIBILITY_SERVICE_BROADCAST"
-    const val ACTION_ACCESSIBILITY_SERVICE_PING = "dev.eseudom.softpowerbutton.util.constants.ACTION_ACCESSIBILITY_SERVICE_PING"
-    const val ACTION_ACCESSIBILITY_SERVICE_PONG = "dev.eseudom.softpowerbutton.util.constants.ACTION_ACCESSIBILITY_SERVICE_PONG"
     const val ACTION_SHOW_FLOATING_GUIDE_DIALOG = "dev.eseudom.softpowerbutton.util.constants.ACTION_SHOW_FLOATING_GUIDE_DIALOG"
 
     const val NOTIFICATION_CHANNEL_ID = "dev.eseudom.softpowerbutton.floating_player_channel"
