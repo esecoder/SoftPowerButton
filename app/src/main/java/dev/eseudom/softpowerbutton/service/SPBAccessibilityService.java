@@ -4,6 +4,7 @@ import static dev.eseudom.softpowerbutton.util.C.ACTION_ACCESSIBILITY_DISABLE_SE
 import static dev.eseudom.softpowerbutton.util.C.ACTION_ACCESSIBILITY_GLOBAL_ACTIONS_DIALOG;
 import static dev.eseudom.softpowerbutton.util.C.ACTION_ACCESSIBILITY_LOCK_SCREEN;
 import static dev.eseudom.softpowerbutton.util.C.ACTION_ACCESSIBILITY_SCREENSHOT;
+import static dev.eseudom.softpowerbutton.util.C.ACTION_ACCESSIBILITY_SERVICE_PING;
 import static dev.eseudom.softpowerbutton.util.C.INTENT_EXTRA_ACTION;
 
 import android.accessibilityservice.AccessibilityService;
@@ -41,6 +42,11 @@ public class SPBAccessibilityService extends AccessibilityService {
                     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
                         disableSelf();
                     } else stopSelf();
+                    break;
+                }
+                case ACTION_ACCESSIBILITY_SERVICE_PING: {
+                    //respond to ping
+                    U.Companion.sendAccessibilityServicePong(context);
                     break;
                 }
             }

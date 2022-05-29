@@ -3,23 +3,22 @@ package dev.eseudom.softpowerbutton
 import android.app.Activity
 import android.app.ActivityManager
 import android.app.admin.DevicePolicyManager
-import android.content.ComponentName
-import android.content.Context
-import android.content.Intent
+import android.content.*
 import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
-import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
+import androidx.localbroadcastmanager.content.LocalBroadcastManager
 import dev.eseudom.softpowerbutton.dialog.EnableServiceDialogFragment
 import dev.eseudom.softpowerbutton.dialog.OverlayPermissionDialogFragment
 import dev.eseudom.softpowerbutton.dialog.XiaomiPermissionDialogFragment
 import dev.eseudom.softpowerbutton.service.FloatingWindowService
 import dev.eseudom.softpowerbutton.util.C.ACCESSIBILITY_SETTINGS_GUIDE
+import dev.eseudom.softpowerbutton.util.C.ACTION_ACCESSIBILITY_SERVICE_PONG
 import dev.eseudom.softpowerbutton.util.C.GENERAL_INSTRUCTIONS
 import dev.eseudom.softpowerbutton.util.C.INTENT_EXTRA_CONFIRM_ENABLE_SERVICE
 import dev.eseudom.softpowerbutton.util.U
@@ -30,6 +29,9 @@ class MainActivity : AppCompatActivity() {
 
     private lateinit var mDPM: DevicePolicyManager
     private lateinit var mSPBDeviceAdmin: ComponentName
+
+    private lateinit var mReceiver: BroadcastReceiver
+    private var accReallyRunning = false //accessibility final confirmation value
 
     private var overlaySettingsResultLauncher = registerForActivityResult(ActivityResultContracts.StartActivityForResult()) { result ->
         if (result.resultCode == Activity.RESULT_OK) {
@@ -60,12 +62,34 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
+    private fun getBroadcastReceiver(): BroadcastReceiver {
+        return object : BroadcastReceiver() {
+            override fun onReceive(context: Context, intent: Intent) {
+                when (intent.action) {
+                    ACTION_ACCESSIBILITY_SERVICE_PONG -> {
+                        showEnableAccessibilityDialog(getString(R.string.accessibility_service_instr))
+                        accReallyRunning = true
+                    }
+                }
+            }
+        }
+    }
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         mDPM = getSystemService(DEVICE_POLICY_SERVICE) as DevicePolicyManager
         mSPBDeviceAdmin = ComponentName(this, FloatingWindowService.SPBDeviceAdminReceiver::class.java)
+
+        registerReceiver()
+    }
+
+    private fun registerReceiver() {
+        val filter = IntentFilter()
+        filter.addAction(ACTION_ACCESSIBILITY_SERVICE_PONG)
+        mReceiver = getBroadcastReceiver()
+        LocalBroadcastManager.getInstance(this).registerReceiver(mReceiver, filter)
     }
 
     override fun onResume() {
@@ -73,6 +97,7 @@ class MainActivity : AppCompatActivity() {
 
         //todo check system internal memory. if low, warn users because services will be axed anytime anyhow
 
+        //is user being asked to enable accessibility service again?
         val confirmEnableServiceIntent = intent.getBooleanExtra(INTENT_EXTRA_CONFIRM_ENABLE_SERVICE, false)
         if (!confirmEnableServiceIntent) {
 
@@ -91,6 +116,7 @@ class MainActivity : AppCompatActivity() {
             }
 
         } else {
+            //ask user to enable accessibility service again
             showEnableAccessibilityDialog(getString(R.string.accessibility_service_not_enabled))
         }
 
@@ -103,20 +129,30 @@ class MainActivity : AppCompatActivity() {
         onResume()
     }
 
+    override fun onStop() {
+        super.onStop()
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver)
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        LocalBroadcastManager.getInstance(this).unregisterReceiver(mReceiver)
+    }
+
     private fun checkToExitActivity() {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.P) { //less than android P devices
 
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) { //greater than android M devices
-                if (Settings.canDrawOverlays(this) && isActiveAdmin() && U.isAccessibilityServiceRunning(this)) {
+                if (Settings.canDrawOverlays(this) && isActiveAdmin() && (U.isAccessibilityServiceRunning(this) || accReallyRunning)) {
                     finalActions()
                 }
             } else { //less than android M devices
-                if (isActiveAdmin() && U.isAccessibilityServiceRunning(this)) {
+                if (isActiveAdmin() && (U.isAccessibilityServiceRunning(this) || accReallyRunning)) {
                     finalActions()
                 }
             }
         } else { //greater than or equal to android P devices
-            if (Settings.canDrawOverlays(this) && U.isAccessibilityServiceRunning(this)) {
+            if (Settings.canDrawOverlays(this) && (U.isAccessibilityServiceRunning(this) || accReallyRunning)) {
                 finalActions()
             }
         }
@@ -138,7 +174,8 @@ class MainActivity : AppCompatActivity() {
 
     private fun checkForAccessibility() {
         if (!U.isAccessibilityServiceRunning(this))
-            showEnableAccessibilityDialog(getString(R.string.accessibility_service_instr))
+            U.sendAccessibilityServicePing(this) //double check by pinging via broadcast
+            //showEnableAccessibilityDialog(getString(R.string.accessibility_service_instr))
     }
 
     private fun checkToShowGeneralGuide() {

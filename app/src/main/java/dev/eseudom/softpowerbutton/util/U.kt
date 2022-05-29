@@ -14,6 +14,8 @@ import android.content.pm.PackageManager
 import android.os.Build
 import android.os.SystemClock
 import android.provider.Settings
+import android.provider.Settings.SettingNotFoundException
+import android.text.TextUtils.SimpleStringSplitter
 import android.util.Log
 import androidx.annotation.RequiresApi
 import androidx.appcompat.app.AppCompatActivity
@@ -31,6 +33,7 @@ import java.io.BufferedReader
 import java.io.IOException
 import java.io.InputStreamReader
 import java.util.*
+
 
 class U {
 
@@ -50,8 +53,35 @@ class U {
 
         fun isAccessibilityServiceRunning(context: Context): Boolean {
             val manager = context.getSystemService(Context.ACTIVITY_SERVICE) as ActivityManager
-            return manager.getRunningServices(Integer.MAX_VALUE)
+            val isWithin = manager.getRunningServices(Integer.MAX_VALUE)
                 .any { it.service.className == SPBAccessibilityService::class.java.name }
+
+            val accessibilityEnabled = try {
+                Settings.Secure.getInt(
+                    context.applicationContext.contentResolver,
+                    Settings.Secure.ACCESSIBILITY_ENABLED
+                )
+            } catch (e: SettingNotFoundException) {
+                0
+            }
+            val service = context.packageName + "/" + SPBAccessibilityService::class.java.canonicalName
+            val mStringColonSplitter = SimpleStringSplitter(':')
+            val isEnabled = if (accessibilityEnabled == 1) {
+                val settingValue = Settings.Secure.getString(
+                    context.applicationContext.contentResolver,
+                    Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES
+                )
+                if (settingValue != null) {
+                    mStringColonSplitter.setString(settingValue)
+                    mStringColonSplitter.any {
+                        it.equals(service, ignoreCase = true)
+                    }
+                } else false
+            } else {
+                false
+            }
+
+            return isWithin || isEnabled
         }
 
         @RequiresApi(api = Build.VERSION_CODES.P)
@@ -122,6 +152,18 @@ class U {
             val intent = Intent(C.ACTION_SHOW_FLOATING_GUIDE_DIALOG)
             intent.putExtra(C.INTENT_EXTRA_DIALOG_TYPE, extra)
             LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
+        }
+
+        fun sendAccessibilityServicePing(context: Context) {
+            val intent = Intent(C.ACTION_ACCESSIBILITY_SERVICE_PING)
+            context.sendBroadcast(intent)
+        }
+
+        fun sendAccessibilityServicePong(context: Context) {
+            val intent = Intent(C.ACTION_ACCESSIBILITY_SERVICE_PONG)
+            //I can't tell what it'll need really. so both
+            LocalBroadcastManager.getInstance(context).sendBroadcast(intent)
+            context.sendBroadcast(intent)
         }
 
         fun disableDeviceAdmin(context: Context) {

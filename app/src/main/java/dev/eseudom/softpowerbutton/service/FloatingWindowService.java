@@ -80,7 +80,7 @@ public class FloatingWindowService extends Service {
 
         //for accessibility service power menu
         U.Companion.setComponentEnabled(this, SPBAccessibilityService.class, true);
-        U.Companion.enableAccessibilityService(this, U.Companion.isAccessibilityServiceRunning(this));
+        //U.Companion.enableAccessibilityService(this, U.Companion.isAccessibilityServiceRunning(this));
 
         mPowerManager = (PowerManager) getSystemService(POWER_SERVICE);
         mWakeLock = mPowerManager.newWakeLock((PowerManager.SCREEN_BRIGHT_WAKE_LOCK | PowerManager.FULL_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP), TAG);
@@ -409,6 +409,8 @@ public class FloatingWindowService extends Service {
                 case C.ACTION_NOTIFICATION_SHOW_GLOBAL_ACTIONS: {
                     if (U.Companion.isAccessibilityServiceRunning(context))
                         U.Companion.sendAccessibilityPowerDialogBroadcast(context);
+                    else
+                        Toast.makeText(context, R.string.enable_accessibility_service_power_menu, Toast.LENGTH_LONG).show();
                     break;
                 }
                 case C.ACTION_NOTIFICATION_STOP_ALL: {

@@ -80,7 +80,7 @@ public class SoftPowerButtonWindow {
         mASM = (AccessibilityManager) context.getSystemService(Context.ACCESSIBILITY_SERVICE);
         //for accessibility service power menu
         U.Companion.setComponentEnabled(context, SPBAccessibilityService.class, true);
-        U.Companion.enableAccessibilityService(context, U.Companion.isAccessibilityServiceRunning(context));
+        //U.Companion.enableAccessibilityService(context, U.Companion.isAccessibilityServiceRunning(context));
 
         displayDensity = context.getResources()
                 .getDisplayMetrics()
